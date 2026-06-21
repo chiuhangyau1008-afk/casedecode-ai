@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CaseDecode AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1c2e45;--navy-mid:#2a4a6b;--navy-light:#e8eef5;
+  --ink:#1a1a1a;--ink-mid:#444;--ink-light:#888;
+  --rule:#d4cfc6;--cream:#f7f5f0;--white:#ffffff;
+  --gold:#b8882a;--success:#2e7d4f;--error:#c0392b;--error-bg:#fff3f3;
+  --highlight-bg:#fff3cd;--float-shadow:0 4px 24px rgba(0,0,0,0.13);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:var(--cream);min-height:100vh;}
+.hidden{display:none!important;}
+
+/* HEADER */
+header{border-bottom:1px solid var(--rule);background:var(--white);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:10;}
+.brand{display:flex;flex-direction:column;gap:2px;}
+.brand-name-row{display:flex;align-items:center;gap:10px;}
+.brand-glyph{width:28px;height:28px;border:1.5px solid var(--navy-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--navy-mid);flex-shrink:0;}
+.brand-name{font-family:'EB Garamond',serif;font-size:20px;font-weight:400;color:var(--navy);letter-spacing:0.01em;}
+.brand-name-stack{display:flex;flex-direction:column;gap:1px;}
+.brand-sub{font-family:'Inter',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mid);}
+.header-right{display:flex;align-items:center;gap:16px;}
+.key-status{font-size:12px;color:var(--ink-light);}
+.key-status.set{color:var(--success);}
+.btn-text{background:none;border:none;font-size:12px;color:var(--navy-mid);cursor:pointer;font-family:'Inter',sans-serif;text-decoration:underline;padding:0;}
+
+/* HERO */
+.hero{padding:52px 48px 36px;max-width:760px;}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.hero h1{font-family:'EB Garamond',serif;font-size:38px;font-weight:400;line-height:1.2;color:var(--navy);margin-bottom:16px;}
+.hero h1 em{font-style:italic;color:var(--navy-mid);}
+.hero-desc{font-size:15px;color:var(--ink-mid);line-height:1.7;max-width:560px;}
+
+/* MAIN */
+.main{padding:0 48px 80px;max-width:1200px;}
+
+/* PANELS */
+.panel{background:var(--white);border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:24px;}
+.panel-header{padding:14px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-mid);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--rule);}
+.tab{padding:11px 20px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-light);cursor:pointer;margin-bottom:-1px;transition:color 0.15s;}
+.tab:hover{color:var(--navy-mid);}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:500;}
+.tab-content{display:none;padding:20px;}
+.tab-content.active{display:block;}
+
+textarea{width:100%;height:260px;padding:12px 14px;border:1px solid var(--rule);border-radius:4px;background:var(--cream);font-family:'EB Garamond',serif;font-size:14px;color:var(--ink);resize:vertical;outline:none;line-height:1.7;transition:border-color 0.15s;}
+textarea:focus{border-color:var(--navy-mid);background:var(--white);}
+textarea::placeholder{color:var(--ink-light);font-style:italic;}
+.text-stats{margin-top:8px;font-size:11px;color:var(--ink-light);min-height:16px;}
+
+.drop-zone{border:1.5px dashed var(--rule);border-radius:6px;padding:36px 24px;text-align:center;background:var(--cream);transition:border-color 0.15s,background 0.15s;cursor:pointer;}
+.drop-zone.drag-over{border-color:var(--navy-mid);background:var(--navy-light);}
+.drop-icon{font-size:28px;margin-bottom:10px;opacity:0.5;}
+.drop-zone p{font-size:13px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6;}
+.drop-zone label{display:inline-block;padding:7px 16px;border:1px solid var(--navy-mid);border-radius:4px;color:var(--navy-mid);font-size:12px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.drop-zone label:hover{background:var(--navy-light);}
+#file-input{display:none;}
+.file-selected{margin-top:10px;font-size:12px;color:var(--success);font-weight:500;}
+
+.chunk-notice{display:none;margin-top:12px;padding:10px 14px;border-radius:4px;font-size:12px;line-height:1.5;}
+.chunk-notice.ok{background:#edf7f1;color:#2e7d4f;border:1px solid #b8e0c8;}
+.chunk-notice.warn{background:#fff8ec;color:#92580a;border:1px solid #f5d89a;}
+
+.key-section{padding:16px 20px;border-top:1px solid var(--rule);background:var(--cream);}
+.key-row{display:flex;gap:8px;align-items:center;}
+.key-row input{flex:1;padding:8px 12px;border:1px solid var(--rule);border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--white);outline:none;transition:border-color 0.15s;}
+.key-row input:focus{border-color:var(--navy-mid);}
+.key-row button{padding:8px 14px;background:var(--navy);color:var(--white);border:none;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+.key-row button:hover{background:var(--navy-mid);}
+.key-hint{margin-top:6px;font-size:11px;color:var(--ink-light);}
+
+.analyse-wrap{padding:0 20px 20px;}
+.btn-analyse{width:100%;padding:13px;background:var(--navy);color:var(--white);border:none;border-radius:4px;font-family:'EB Garamond',serif;font-size:17px;letter-spacing:0.02em;cursor:pointer;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-analyse:hover:not(:disabled){background:var(--navy-mid);}
+.btn-analyse:disabled{background:#b0bec5;cursor:not-allowed;}
+
+/* PROGRESS */
+.progress-panel{display:none;background:var(--white);border:1px solid var(--rule);border-radius:6px;padding:32px;text-align:center;margin-bottom:24px;}
+.progress-panel.visible{display:block;}
+.progress-track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:16px;}
+.progress-fill{height:100%;background:var(--navy);border-radius:1px;width:0%;transition:width 0.5s ease;}
+.progress-label{font-size:13px;color:var(--ink-mid);font-family:'EB Garamond',serif;font-style:italic;}
+
+/* ERROR */
+.error-banner{display:none;padding:14px 20px;background:var(--error-bg);border:1px solid #f5c0c0;border-radius:6px;font-size:13px;color:var(--error);align-items:center;gap:12px;margin-bottom:24px;}
+.error-banner.visible{display:flex;}
+.error-banner p{flex:1;line-height:1.5;}
+
+/* OUTPUT AREA — split layout */
+.output-wrapper{display:none;margin-bottom:24px;}
+.output-wrapper.visible{display:block;}
+
+.output-split{display:grid;grid-template-columns:1fr;gap:0;}
+.output-split.show-source{grid-template-columns:1fr 1fr;}
+
+.output-panel{background:var(--white);border:1px solid var(--rule);border-radius:6px 0 0 6px;overflow:hidden;}
+.output-split:not(.show-source) .output-panel{border-radius:6px;}
+
+.source-panel{background:#f9f8f5;border:1px solid var(--rule);border-left:none;border-radius:0 6px 6px 0;overflow:hidden;display:none;}
+.output-split.show-source .source-panel{display:flex;flex-direction:column;}
+
+.panel-header{padding:14px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;background:var(--white);}
+
+/* OUTPUT BODY — formatted */
+.output-body{
+  padding:28px 32px;
+  font-family:'EB Garamond',serif;
+  font-size:15px;
+  line-height:1.9;
+  color:var(--ink);
+  max-height:70vh;
+  overflow-y:auto;
+  user-select:text;
+}
+
+/* Formatted output elements */
+.facts-divider{border:none;border-top:1px solid var(--rule);margin:20px 0;}
+.output-body .case-header{
+  background:var(--navy-light);
+  border-left:3px solid var(--navy-mid);
+  padding:14px 18px;
+  border-radius:0 4px 4px 0;
+  margin-bottom:24px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+.output-body .issue-block{margin-bottom:32px;}
+.output-body .issue-heading{
+  font-family:'EB Garamond',serif;
+  font-size:17px;
+  font-weight:500;
+  color:var(--navy);
+  border-bottom:1.5px solid var(--navy-mid);
+  padding-bottom:6px;
+  margin-bottom:16px;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.output-body .judge-block{margin-bottom:20px;}
+.output-body .judge-heading{
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+  margin-bottom:8px;
+  letter-spacing:0.01em;
+}
+.output-body .judge-heading .role-badge{
+  font-weight:400;
+  font-size:11px;
+  padding:1px 7px;
+  border-radius:10px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+.role-majority{background:#e8eef5;color:#1c2e45;}
+.role-concurring{background:#edf7f1;color:#2e7d4f;}
+.role-dissenting{background:#fff3f3;color:#c0392b;}
+.output-body .reasoning-list{list-style:none;padding:0;margin:0 0 10px 0;}
+.output-body .reasoning-list li{
+  padding:3px 0 3px 18px;
+  position:relative;
+  font-family:'EB Garamond',serif;
+  font-size:15px;
+  line-height:1.8;
+}
+.output-body .reasoning-list li::before{content:"•";position:absolute;left:4px;color:var(--navy-mid);}
+
+/* VERDICT ROW */
+.verdict-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin:6px 0 4px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:12px;
+  line-height:1.5;
+}
+.verdict-pill{
+  flex-shrink:0;
+  padding:2px 9px;
+  border-radius:10px;
+  font-weight:600;
+  font-size:11px;
+  letter-spacing:0.03em;
+}
+.verdict-yes{background:#edf7f1;color:#2e7d4f;border:1px solid #b8e0c8;}
+.verdict-no{background:#fff3f3;color:#c0392b;border:1px solid #f5c0c0;}
+.verdict-unresolved{background:#f5f5f5;color:#666;border:1px solid #ddd;}
+.verdict-conditions{color:var(--ink-mid);}
+
+/* SOURCE PANEL */
+.source-body{
+  padding:20px 24px;
+  font-family:'EB Garamond',serif;
+  font-size:14px;
+  line-height:1.8;
+  color:var(--ink);
+  overflow-y:auto;
+  flex:1;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.source-body .src-highlight{background:#fff3cd;border-radius:2px;padding:0 2px;}
+.source-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink-light);padding:0 4px;}
+.source-close:hover{color:var(--ink);}
+
+/* FLOATING TOOLTIP */
+.float-box{
+  position:fixed;
+  z-index:999;
+  background:var(--white);
+  border:1px solid var(--rule);
+  border-radius:8px;
+  box-shadow:var(--float-shadow);
+  width:320px;
+  min-width:200px;
+  max-height:380px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  line-height:1.6;
+  color:var(--ink);
+  display:none;
+  pointer-events:auto;
+  flex-direction:column;
+  cursor:default;
+}
+.float-box.visible{display:flex;}
+.float-box-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;flex-shrink:0;border-bottom:1px solid var(--rule);cursor:grab;}
+.float-box-header:active{cursor:grabbing;}
+.float-box-title{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-light);}
+.float-box-close{background:none;border:none;font-size:15px;color:var(--ink-light);cursor:pointer;padding:0 2px;line-height:1;}
+.float-box-close:hover{color:var(--ink);}
+.float-box-scroll{overflow-y:auto;padding:10px 12px 12px;flex:1;}
+.float-box-content{color:var(--ink-mid);margin-bottom:8px;font-size:13px;}
+.float-box-input{width:100%;border:1px solid var(--rule);border-radius:4px;padding:6px 10px;font-family:'Inter',sans-serif;font-size:12px;outline:none;margin-top:6px;color:var(--ink);}
+.float-box-input:focus{border-color:var(--navy-mid);}
+.float-box-answer{margin-top:8px;font-size:12px;color:var(--ink-mid);line-height:1.5;border-top:1px solid var(--rule);padding-top:8px;display:none;}
+.float-loading{font-size:11px;color:var(--ink-light);font-style:italic;margin-top:4px;display:none;}
+
+/* BUTTONS */
+.btn-sm{padding:5px 12px;background:var(--white);color:var(--navy-mid);border:1px solid var(--rule);border-radius:3px;font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
+.btn-sm:hover{background:var(--navy-light);}
+
+/* SELECTION TOOLBAR */
+.sel-toolbar{
+  position:fixed;
+  z-index:998;
+  background:var(--navy);
+  border-radius:6px;
+  padding:5px 6px;
+  display:none;
+  gap:4px;
+  box-shadow:var(--float-shadow);
+}
+.sel-toolbar.visible{display:flex;}
+.sel-btn{
+  padding:4px 10px;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  font-size:11px;
+  font-weight:500;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  white-space:nowrap;
+  transition:background 0.15s;
+}
+.sel-btn:hover{background:rgba(255,255,255,0.2);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.visible{display:flex;}
+.modal{background:var(--white);border-radius:8px;padding:32px;width:440px;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.modal h2{font-family:'EB Garamond',serif;font-size:22px;font-weight:400;color:var(--navy);margin-bottom:8px;}
+.modal p{font-size:13px;color:var(--ink-mid);line-height:1.6;margin-bottom:20px;}
+.modal input{width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;outline:none;margin-bottom:12px;transition:border-color 0.15s;}
+.modal input:focus{border-color:var(--navy-mid);}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-modal-primary{padding:9px 20px;background:var(--navy);color:var(--white);border:none;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.btn-modal-primary:hover{background:var(--navy-mid);}
+.btn-modal-cancel{padding:9px 16px;background:none;color:var(--ink-mid);border:1px solid var(--rule);border-radius:4px;font-size:13px;cursor:pointer;}
+
+footer{border-top:1px solid var(--rule);padding:20px 48px;font-size:11px;color:var(--ink-light);display:flex;gap:24px;}
+@media(max-width:768px){
+  header{padding:0 16px;}
+  .hero{padding:32px 16px 24px;}
+  .hero h1{font-size:28px;}
+  .main{padding:0 16px 60px;}
+  .output-split.show-source{grid-template-columns:1fr;}
+  .source-panel{border-left:1px solid var(--rule);border-radius:6px;margin-top:16px;}
+  footer{padding:16px;flex-direction:column;gap:6px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-name-row">
+      <div class="brand-glyph">&#9878;</div>
+      <div class="brand-name-stack">
+        <div class="brand-name">CaseDecode AI</div>
+        <div class="brand-sub">AI Judicial Reasoning Analyser</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="key-status" id="key-status">No API key set</span>
+    <button class="btn-text" id="change-key-btn">Change key</button>
+  </div>
+</header>
+
+<section class="hero">
+  <p class="hero-eyebrow">Legal reasoning extraction</p>
+  <h1>Every judge.<br/><em>Every argument.</em><br/>Nothing lost.</h1>
+  <p class="hero-desc">Paste or upload a judgment and get back a complete structured reasoning map — separated by judge, organised by issue, with all qualifications and dissents preserved in full. No summarisation. Reorganisation only.</p>
+</section>
+
+<div class="main">
+
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab active" data-tab="paste">Paste text</button>
+      <button class="tab" data-tab="upload">Upload PDF</button>
+    </div>
+    <div class="tab-content active" id="tab-paste">
+      <textarea id="judgment-text" placeholder="Paste the full judgment text here…"></textarea>
+      <div class="text-stats" id="text-stats"></div>
+      <div class="chunk-notice" id="chunk-notice-paste"></div>
+    </div>
+    <div class="tab-content" id="tab-upload">
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-icon">📄</div>
+        <p>Drop a PDF or .txt file here</p>
+        <label for="file-input">Choose file</label>
+        <input type="file" id="file-input" accept=".pdf,.txt"/>
+        <div class="file-selected" id="file-selected"></div>
+      </div>
+      <div class="chunk-notice" id="chunk-notice-upload"></div>
+    </div>
+    <div class="key-section" id="key-section">
+      <div class="key-row">
+        <input type="password" id="api-key-inline" placeholder="Paste your Claude API key (sk-ant-…)" autocomplete="off"/>
+        <button id="save-key-inline-btn">Save key</button>
+      </div>
+      <p class="key-hint">Stored in your browser only. Never sent anywhere except Anthropic's API.</p>
+    </div>
+    <div class="analyse-wrap">
+      <button class="btn-analyse" id="analyse-btn" disabled>Decode</button>
+    </div>
+  </div>
+
+  <div class="progress-panel" id="progress-panel">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <p class="progress-label" id="progress-label">Preparing…</p>
+  </div>
+
+  <div class="error-banner" id="error-banner">
+    <p id="error-msg"></p>
+    <button class="btn-sm" id="retry-btn">Try again</button>
+  </div>
+
+  <div class="output-wrapper" id="output-wrapper">
+    <div class="output-split" id="output-split">
+      <div class="output-panel panel">
+        <div class="panel-header">
+          <span class="panel-title">Reasoning map</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sm" id="copy-btn">Copy</button>
+            <button class="btn-sm" id="new-btn">New judgment</button>
+          </div>
+        </div>
+        <div class="output-body" id="output-body"></div>
+      </div>
+      <div class="source-panel" id="source-panel">
+        <div class="panel-header">
+          <span class="panel-title">Source text</span>
+          <button class="source-close" id="source-close-btn" title="Close source">✕</button>
+        </div>
+        <div class="source-body" id="source-body"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>CaseDecode AI — personal research tool</span>
+  <span>API calls go directly from your browser to Anthropic. Your key never leaves your device.</span>
+</footer>
+
+<!-- Selection toolbar -->
+<div class="sel-toolbar" id="sel-toolbar">
+  <button class="sel-btn" id="sel-explain-btn">Explain</button>
+  <button class="sel-btn" id="sel-source-btn">Find in source</button>
+</div>
+
+<!-- Floating tooltip -->
+<div class="float-box" id="float-box">
+  <div class="float-box-header" id="float-box-drag">
+    <div class="float-box-title" id="float-box-title">Definition</div>
+    <button class="float-box-close" id="float-box-close" title="Close">&#x2715;</button>
+  </div>
+  <div class="float-box-scroll">
+    <div class="float-box-content" id="float-box-content"></div>
+    <div class="float-loading" id="float-loading">Thinking&#x2026;</div>
+    <input class="float-box-input" id="float-box-input" placeholder="Ask a follow-up question&#x2026;" autocomplete="off"/>
+    <div class="float-box-answer" id="float-box-answer"></div>
+  </div>
+</div>
+
+<!-- Key modal -->
+<div class="modal-overlay" id="key-modal">
+  <div class="modal">
+    <h2>Update API key</h2>
+    <p>Enter your Claude API key. Saved in your browser's local storage only.</p>
+    <input type="password" id="modal-key-input" placeholder="sk-ant-…" autocomplete="off"/>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" id="modal-cancel-btn">Cancel</button>
+      <button class="btn-modal-primary" id="modal-save-btn">Save key</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const MAX_CHUNK_CHARS = 320000;
+
+const SYSTEM_PROMPT = `You are a legal reasoning extraction tool. Your sole purpose is to reconstruct judicial judgments into structured reasoning maps.
+
+CORE PRINCIPLE: You do not summarise. You reorganise. Every argument, qualification, nuance, and distinction made by each judge must be preserved in full. Nothing may be omitted, compressed, or merged.
+
+IDENTITY SEPARATION: Treat each judge as a completely separate voice. Never write "the Court held" or "the judges agreed". Always attribute every point to its specific author. If two judges reach the same conclusion by different reasoning, record both reasoning chains in full.
+
+ROLE IDENTIFICATION: At the outset, identify each judge and their role:
+- Majority (list judges)
+- Concurring (list judges and note whether they agree with outcome only, or also with reasoning)
+- Dissenting (list judges)
+
+OUTPUT STRUCTURE: For each legal issue in the case, produce the following in this EXACT format:
+
+ISSUE [N]: [Name of issue]
+
+VERDICT: [Judge Name] | [YES/NO/UNRESOLVED] | [Brief condition or reason — one sentence max]
+VERDICT: [Next Judge Name] | [YES/NO/UNRESOLVED] | [Brief condition or reason]
+
+[Judge Name] — [Majority / Concurring / Dissenting]
+  • [Reasoning point 1 — preserve exact qualifications]
+  • [Reasoning point 2]
+
+[Next Judge Name] — [role]
+  • [Their reasoning]
+
+VERDICT lines must appear immediately after the issue heading and before the detailed reasoning. They summarise each judge's answer to the issue in YES/NO/UNRESOLVED + one-sentence condition. Example:
+VERDICT: Lord Reed | YES | But only where the claimant belongs to a defined statutory class [para 41]
+VERDICT: Lord Sales | NO | Statutory scheme excludes private law liability [para 115]
+
+QUALIFICATIONS AND NUANCE: Preserve all exact qualifications. Do not flatten. Precision is everything.
+
+CONCURRENCES: Record what they agree with, disagree with, where reasoning diverges, any narrower or broader interpretation.
+
+DISSENTS: Record the precise divergence point, every argument, any disputed factual or legal assumptions.
+
+PARAGRAPH REFERENCES: Note paragraph numbers in square brackets after each point where possible.
+
+PROHIBITED BEHAVIOURS:
+  - Do not write "the majority held" without naming judges
+  - Do not merge two judges' reasoning
+  - Do not omit any judge's reasoning on any issue
+  - Do not paraphrase losing a qualification
+  - Do not add your own analysis or opinion
+
+OUTPUT FORMAT: Begin with a header block:
+Case: [Case name]
+Court: [Court name]
+Year: [Year]
+Judges: [List all with roles]
+
+Then a FACTS section in this exact format:
+FACTS:
+FACT: [one fact per line, drawn directly from the judgment — parties, what happened, procedural history, key dates]
+FACT: [next fact]
+(continue for all key facts)
+
+Then:
+Issues identified: [numbered list]
+
+Then produce the full issue-by-issue reasoning map.
+
+FORMATTING RULES: Do not use markdown. Do not use asterisks (*) for bold or emphasis. Do not use hashtags (#) for headings. Write plain text only. Use the structured labels (ISSUE, VERDICT, FACTS, FACT) as defined above.`;
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentText = '';
+let apiKey = localStorage.getItem('cd_api_key') || '';
+let lastSelection = '';
+let floatTimeout = null;
+
+// ── Init ───────────────────────────────────────────────────────────────────
+updateKeyStatus();
+bindEvents();
+
+function updateKeyStatus() {
+  const el = document.getElementById('key-status');
+  const section = document.getElementById('key-section');
+  if (apiKey) { el.textContent = 'API key saved'; el.className = 'key-status set'; section.style.display = 'none'; }
+  else { el.textContent = 'No API key set'; el.className = 'key-status'; section.style.display = 'block'; }
+  updateAnalyseBtn();
+}
+
+function updateAnalyseBtn() {
+  document.getElementById('analyse-btn').disabled = !currentText || currentText.length < 100 || !apiKey;
+}
+
+// ── Bind events ────────────────────────────────────────────────────────────
+function bindEvents() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      currentText = ''; updateAnalyseBtn(); hideNotices();
+    });
+  });
+
+  document.getElementById('judgment-text').addEventListener('input', e => {
+    currentText = e.target.value.trim();
+    updateTextStats(currentText); updateChunkNotice(currentText,'paste'); updateAnalyseBtn();
+  });
+
+  document.getElementById('file-input').addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+  document.getElementById('save-key-inline-btn').addEventListener('click', saveInlineKey);
+  document.getElementById('api-key-inline').addEventListener('keydown', e => { if(e.key==='Enter') saveInlineKey(); });
+
+  document.getElementById('change-key-btn').addEventListener('click', () => {
+    document.getElementById('key-modal').classList.add('visible');
+    document.getElementById('modal-key-input').focus();
+  });
+  document.getElementById('modal-cancel-btn').addEventListener('click', () => document.getElementById('key-modal').classList.remove('visible'));
+  document.getElementById('modal-save-btn').addEventListener('click', saveModalKey);
+  document.getElementById('key-modal').addEventListener('click', e => { if(e.target===document.getElementById('key-modal')) document.getElementById('key-modal').classList.remove('visible'); });
+
+  document.getElementById('analyse-btn').addEventListener('click', runAnalysis);
+  document.getElementById('copy-btn').addEventListener('click', copyOutput);
+  document.getElementById('new-btn').addEventListener('click', resetUI);
+  document.getElementById('retry-btn').addEventListener('click', () => { document.getElementById('error-banner').classList.remove('visible'); runAnalysis(); });
+  document.getElementById('source-close-btn').addEventListener('click', closeSourcePanel);
+
+  // Selection events
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('selectionchange', onSelectionChange);
+
+  // Float box follow-up
+  document.getElementById('float-box-input').addEventListener('keydown', async e => {
+    if(e.key !== 'Enter') return;
+    const q = e.target.value.trim();
+    if(!q) return;
+    e.target.value = '';
+    await answerFollowUp(q);
+  });
+
+  // Selection toolbar buttons
+  document.getElementById('sel-explain-btn').addEventListener('click', () => {
+    hideSelToolbar();
+    triggerExplain(lastSelection);
+  });
+  document.getElementById('sel-source-btn').addEventListener('click', () => {
+    hideSelToolbar();
+    findInSource(lastSelection);
+  });
+
+  // Hide float box when clicking outside
+  document.addEventListener('mousedown', e => {
+    const fb = document.getElementById('float-box');
+    const tb = document.getElementById('sel-toolbar');
+    if(fb.contains(e.target) || tb.contains(e.target)) return;
+    hideFloat();
+    if(!document.getElementById('output-body').contains(e.target)) {
+      hideSelToolbar();
+    }
+  });
+}
+
+function saveInlineKey() {
+  const val = document.getElementById('api-key-inline').value.trim();
+  if(!val.startsWith('sk-ant-')) { alert('That doesn\'t look like a Claude API key — it should start with sk-ant-'); return; }
+  apiKey = val; localStorage.setItem('cd_api_key', val);
+  document.getElementById('api-key-inline').value = '';
+  updateKeyStatus();
+}
+
+function saveModalKey() {
+  const val = document.getElementById('modal-key-input').value.trim();
+  if(!val.startsWith('sk-ant-')) { alert('That doesn\'t look like a Claude API key — it should start with sk-ant-'); return; }
+  apiKey = val; localStorage.setItem('cd_api_key', val);
+  document.getElementById('modal-key-input').value = '';
+  document.getElementById('key-modal').classList.remove('visible');
+  updateKeyStatus();
+}
+
+// ── File handling ──────────────────────────────────────────────────────────
+async function handleFile(file) {
+  const label = document.getElementById('file-selected');
+  label.textContent = 'Reading ' + file.name + '…';
+  try {
+    if(file.type==='text/plain'||file.name.endsWith('.txt')) { currentText = await file.text(); }
+    else if(file.type==='application/pdf'||file.name.endsWith('.pdf')) { currentText = await extractPdfText(file); }
+    else { alert('Please upload a PDF or .txt file.'); label.textContent=''; return; }
+    label.textContent = '✓ ' + file.name + ' — ' + wordCount(currentText).toLocaleString() + ' words';
+    updateChunkNotice(currentText,'upload'); updateAnalyseBtn();
+  } catch(err) { label.textContent = 'Error reading file — try pasting the text instead.'; console.error(err); }
+}
+
+async function extractPdfText(file) {
+  if(typeof pdfjsLib==='undefined') throw new Error('PDF library not loaded. Please paste the text instead.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buffer}).promise;
+  let text = '';
+  for(let i=1;i<=pdf.numPages;i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item=>item.str).join(' ') + '\n\n';
+  }
+  return text.trim();
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function wordCount(t){ return t.trim()?t.trim().split(/\s+/).length:0; }
+
+function updateTextStats(text) {
+  const el = document.getElementById('text-stats');
+  el.textContent = text ? '~'+wordCount(text).toLocaleString()+' words' : '';
+}
+
+function updateChunkNotice(text, which) {
+  const el = document.getElementById('chunk-notice-'+which);
+  if(!text){el.style.display='none';return;}
+  const chunks = splitIntoChunks(text);
+  el.style.display='block';
+  if(chunks.length===1){el.className='chunk-notice ok';el.textContent='✓ Fits in a single request.';}
+  else{el.className='chunk-notice warn';el.textContent='Long judgment — will be processed in '+chunks.length+' sections and merged automatically.';}
+}
+
+function hideNotices() {
+  document.getElementById('chunk-notice-paste').style.display='none';
+  document.getElementById('chunk-notice-upload').style.display='none';
+  document.getElementById('text-stats').textContent='';
+}
+
+function setProgress(pct,label) {
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-label').textContent=label;
+}
+
+function resetUI() {
+  document.getElementById('output-wrapper').classList.remove('visible');
+  document.getElementById('error-banner').classList.remove('visible');
+  document.getElementById('progress-panel').classList.remove('visible');
+  document.getElementById('judgment-text').value='';
+  document.getElementById('file-selected').textContent='';
+  closeSourcePanel();
+  hideNotices();
+  currentText=''; updateAnalyseBtn();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function copyOutput() {
+  const text = document.getElementById('output-body').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',1800);
+  });
+}
+
+function closeSourcePanel() {
+  document.getElementById('output-split').classList.remove('show-source');
+  document.getElementById('source-panel').style.display='none';
+}
+
+// ── Chunking ───────────────────────────────────────────────────────────────
+function splitIntoChunks(text) {
+  if(text.length<=MAX_CHUNK_CHARS) return [text];
+  const chunks=[];
+  const judgePattern=/(?=\n(?:LORD|LADY|LORD JUSTICE|SIR)\s+[A-Z][A-Z\s]+(?:JSC|SCJ|MR|LJ)?[\s\n]*(?:\(with whom|\(dissenting)?)/gi;
+  const sections=text.split(judgePattern);
+  if(sections.length>1){
+    let current='';
+    for(const section of sections){
+      if((current+section).length>MAX_CHUNK_CHARS&&current.length>0){chunks.push(current.trim());current=section;}
+      else{current+=section;}
+    }
+    if(current.trim()) chunks.push(current.trim());
+    return chunks;
+  }
+  const paragraphs=text.split(/\n\s*\n/);
+  let current='';
+  for(const para of paragraphs){
+    if((current+'\n\n'+para).length>MAX_CHUNK_CHARS&&current.length>0){chunks.push(current.trim());current=para;}
+    else{current+=(current?'\n\n':'')+para;}
+  }
+  if(current.trim()) chunks.push(current.trim());
+  return chunks;
+}
+
+// ── Claude API ─────────────────────────────────────────────────────────────
+async function callClaude(userMessage, systemOverride, maxTokens) {
+  const response = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens||8000,system:systemOverride||SYSTEM_PROMPT,messages:[{role:'user',content:userMessage}]})
+  });
+  if(!response.ok){const err=await response.json().catch(()=>({}));throw new Error(err.error?.message||'API error '+response.status);}
+  const data=await response.json();
+  return data.content.map(b=>b.text||'').join('');
+}
+
+// ── Strip markdown from text ───────────────────────────────────────────────
+function stripMd(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g,'$1')  // bold
+    .replace(/\*(.+?)\*/g,'$1')       // italic
+    .replace(/^#+\s*/gm,'')           // headings
+    .replace(/^[-*]\s+/gm,'')         // list bullets
+    .trim();
+}
+
+// ── Render inline bold/underline from our own markup ───────────────────────
+function renderInline(el, text) {
+  // We use __text__ for bold and ^^text^^ for underline in our own output
+  // But since we strip markdown, just set textContent directly
+  el.textContent = stripMd(text);
+}
+
+// ── Reading time ───────────────────────────────────────────────────────────
+function readingTime(text) {
+  const words = text.trim().split(/\s+/).length;
+  const mins = Math.ceil(words / 200); // legal reading ~200wpm
+  return mins === 1 ? '~1 min read' : '~' + mins + ' min read';
+}
+
+// ── Format output ──────────────────────────────────────────────────────────
+function formatOutput(rawText) {
+  const container = document.createElement('div');
+
+  // Reading time bar
+  const rtBar = document.createElement('div');
+  rtBar.style.cssText='font-family:"Inter",sans-serif;font-size:11px;color:var(--ink-light);margin-bottom:16px;display:flex;align-items:center;gap:8px;';
+  const rtIcon = document.createElement('span');
+  rtIcon.textContent='⏱';
+  const rtLabel = document.createElement('span');
+  rtLabel.textContent = readingTime(rawText);
+  rtBar.appendChild(rtIcon);
+  rtBar.appendChild(rtLabel);
+  container.appendChild(rtBar);
+
+  const lines = rawText.split('\n');
+  let i = 0;
+
+  // Case header block (lines before FACTS: or first ISSUE)
+  let headerLines = [];
+  while(i < lines.length && !lines[i].match(/^FACTS:/i) && !lines[i].match(/^ISSUE\s+\d+/i)) {
+    headerLines.push(lines[i]);
+    i++;
+  }
+  if(headerLines.join('').trim()) {
+    const hdr = document.createElement('div');
+    hdr.className = 'case-header';
+    hdr.textContent = headerLines.join('\n').trim().replace(/\*\*|\*/g,'').replace(/^#+\s*/gm,'');
+    container.appendChild(hdr);
+  }
+
+  // FACTS block
+  if(i < lines.length && lines[i].match(/^FACTS:/i)) {
+    i++; // skip "FACTS:" line
+    const factsBlock = document.createElement('div');
+    factsBlock.style.cssText='margin-bottom:28px;';
+
+    const factsHead = document.createElement('div');
+    factsHead.style.cssText='font-family:"Inter",sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:10px;';
+    factsHead.textContent='Case Facts';
+    factsBlock.appendChild(factsHead);
+
+    const factsList = document.createElement('ul');
+    factsList.style.cssText='list-style:none;padding:0;margin:0;';
+
+    while(i < lines.length && !lines[i].match(/^Issues identified:/i) && !lines[i].match(/^ISSUE\s+\d+/i)) {
+      const fl = lines[i].trim();
+      if(fl.match(/^FACT:/i)) {
+        const li = document.createElement('li');
+        li.style.cssText='padding:3px 0 3px 18px;position:relative;font-family:"EB Garamond",serif;font-size:15px;line-height:1.8;';
+        li.innerHTML='<span style="position:absolute;left:4px;color:var(--navy-mid);">•</span>';
+        const txt = document.createTextNode(stripMd(fl.replace(/^FACT:\s*/i,'')));
+        li.appendChild(txt);
+        factsList.appendChild(li);
+      } else if(fl && !fl.match(/^FACTS:/i)) {
+        // plain line in facts section
+        const li = document.createElement('li');
+        li.style.cssText='padding:3px 0 3px 18px;position:relative;font-family:"EB Garamond",serif;font-size:15px;line-height:1.8;';
+        li.innerHTML='<span style="position:absolute;left:4px;color:var(--navy-mid);">•</span>';
+        li.appendChild(document.createTextNode(stripMd(fl)));
+        factsList.appendChild(li);
+      }
+      i++;
+    }
+    if(factsList.children.length) factsBlock.appendChild(factsList);
+    container.appendChild(factsBlock);
+
+    // Skip "Issues identified:" line if present
+    if(i < lines.length && lines[i].match(/^Issues identified:/i)) {
+      // Render it as a small label
+      const issLabel = document.createElement('div');
+      issLabel.style.cssText='font-family:"Inter",sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:10px;';
+      issLabel.textContent='Issues';
+      container.appendChild(issLabel);
+      i++;
+      // collect issue list items until first ISSUE N:
+      const issueListDiv = document.createElement('div');
+      issueListDiv.style.cssText='margin-bottom:24px;font-family:"EB Garamond",serif;font-size:14px;color:var(--ink-mid);line-height:1.8;';
+      while(i < lines.length && !lines[i].match(/^ISSUE\s+\d+/i)) {
+        if(lines[i].trim()) {
+          const d = document.createElement('div');
+          d.textContent = stripMd(lines[i].trim());
+          issueListDiv.appendChild(d);
+        }
+        i++;
+      }
+      if(issueListDiv.children.length) container.appendChild(issueListDiv);
+    }
+  }
+
+  // Issues
+  while(i < lines.length) {
+    const line = lines[i];
+
+    // Issue heading
+    if(line.match(/^ISSUE\s+\d+/i)) {
+      const issueBlock = document.createElement('div');
+      issueBlock.className = 'issue-block';
+
+      const issueHead = document.createElement('div');
+      issueHead.className = 'issue-heading';
+      issueHead.textContent = line.replace(/^ISSUE\s+\d+[:\.]?\s*/i,'').trim() || line.trim();
+      // Keep issue number too
+      issueHead.textContent = line.trim();
+      issueBlock.appendChild(issueHead);
+      i++;
+
+      // Collect verdicts and judge blocks
+      while(i < lines.length && !lines[i].match(/^ISSUE\s+\d+/i)) {
+        const l = lines[i];
+
+        // VERDICT line
+        if(l.match(/^VERDICT:/i)) {
+          const parts = l.replace(/^VERDICT:\s*/i,'').split('|');
+          const judgeName = (parts[0]||'').trim();
+          const answer = (parts[1]||'').trim().toUpperCase();
+          const condition = (parts[2]||'').trim();
+
+          const vRow = document.createElement('div');
+          vRow.className = 'verdict-row';
+
+          const pill = document.createElement('span');
+          pill.className = 'verdict-pill ' + (answer==='YES'?'verdict-yes':answer==='NO'?'verdict-no':'verdict-unresolved');
+          pill.textContent = answer || 'UNRESOLVED';
+          vRow.appendChild(pill);
+
+          const vText = document.createElement('span');
+          vText.className = 'verdict-conditions';
+          vText.textContent = judgeName + (condition ? ' — ' + condition : '');
+          vRow.appendChild(vText);
+
+          issueBlock.appendChild(vRow);
+          i++;
+          continue;
+        }
+
+        // Judge heading line (e.g. "Lord Reed — Majority")
+        if(l.match(/^[A-Z][a-zA-Z\s]+—\s*(Majority|Concurring|Dissenting)/i) && l.trim() && !l.startsWith('•')) {
+          const judgeBlock = document.createElement('div');
+          judgeBlock.className = 'judge-block';
+
+          const jHead = document.createElement('div');
+          jHead.className = 'judge-heading';
+
+          const dashIdx = l.indexOf('—');
+          const jName = dashIdx>-1 ? l.substring(0,dashIdx).trim() : l.trim();
+          const roleRaw = dashIdx>-1 ? l.substring(dashIdx+1).trim() : '';
+          const roleLC = roleRaw.toLowerCase();
+          const roleClass = roleLC.includes('majority')?'role-majority':roleLC.includes('concur')?'role-concurring':'role-dissenting';
+
+          jHead.textContent = jName;
+          if(roleRaw) {
+            const badge = document.createElement('span');
+            badge.className = 'role-badge '+roleClass;
+            badge.textContent = roleRaw;
+            jHead.appendChild(badge);
+          }
+          judgeBlock.appendChild(jHead);
+          i++;
+
+          // Reasoning bullets
+          const ul = document.createElement('ul');
+          ul.className = 'reasoning-list';
+          while(i < lines.length && !lines[i].match(/^ISSUE\s+\d+/i) && !lines[i].match(/^VERDICT:/i) && !lines[i].match(/^[A-Z][a-zA-Z\s]+—\s*(Majority|Concurring|Dissenting)/i)) {
+            const bl = lines[i].trim();
+            if(bl.startsWith('•') || bl.startsWith('-') || bl.startsWith('*')) {
+              const li = document.createElement('li');
+              li.textContent = stripMd(bl.replace(/^[•\-\*]\s*/,''));
+              ul.appendChild(li);
+            } else if(bl && !bl.match(/^#+/)) {
+              const li = document.createElement('li');
+              li.textContent = stripMd(bl);
+              ul.appendChild(li);
+            }
+            i++;
+          }
+          if(ul.children.length) judgeBlock.appendChild(ul);
+          issueBlock.appendChild(judgeBlock);
+          continue;
+        }
+
+        // Plain text line
+        if(l.trim()) {
+          const p = document.createElement('p');
+          p.style.cssText='font-size:14px;color:var(--ink-mid);margin:4px 0;';
+          p.textContent = stripMd(l.trim());
+          issueBlock.appendChild(p);
+        }
+        i++;
+      }
+
+      container.appendChild(issueBlock);
+      continue;
+    }
+
+    // Any leftover line
+    if(line.trim()) {
+      const p = document.createElement('p');
+      p.style.cssText='font-size:14px;color:var(--ink-mid);margin:4px 0;';
+      p.textContent = line.trim();
+      container.appendChild(p);
+    }
+    i++;
+  }
+
+  return container;
+}
+
+// ── Main analysis ──────────────────────────────────────────────────────────
+async function runAnalysis() {
+  if(!currentText||!apiKey) return;
+  document.getElementById('output-wrapper').classList.remove('visible');
+  document.getElementById('error-banner').classList.remove('visible');
+  document.getElementById('progress-panel').classList.add('visible');
+  document.getElementById('analyse-btn').disabled=true;
+  setProgress(5,'Preparing judgment…');
+
+  try {
+    const chunks=splitIntoChunks(currentText);
+    let finalOutput='';
+
+    if(chunks.length===1){
+      setProgress(20,'Sending to Claude…');
+      finalOutput=await callClaude('Here is the full judgment text. Please produce the complete reasoning map.\n\n---\n\n'+chunks[0]);
+      setProgress(95,'Finalising…');
+    } else {
+      const sectionOutputs=[];
+      for(let i=0;i<chunks.length;i++){
+        const pct=10+Math.round((i/chunks.length)*70);
+        setProgress(pct,'Processing section '+(i+1)+' of '+chunks.length+'…');
+        const sysOverride=SYSTEM_PROMPT+'\n\nNOTE: This is section '+(i+1)+' of '+chunks.length+' of a long judgment. Extract all reasoning visible in this section only. Do not write a case header unless you can see the case name clearly.';
+        const result=await callClaude('Section '+(i+1)+' of '+chunks.length+':\n\n---\n\n'+chunks[i],sysOverride);
+        sectionOutputs.push(result);
+      }
+      setProgress(85,'Merging sections…');
+      const mergePrompt='Merge these '+chunks.length+' reasoning map sections into one coherent document. Preserve every point. Combine same judge + same issue. Remove duplicate headers. Keep all VERDICT lines.\n\n'+sectionOutputs.map((s,i)=>'=== SECTION '+(i+1)+' ===\n'+s).join('\n\n');
+      finalOutput=await callClaude(mergePrompt,'You are a legal document editor. Merge sections. Preserve everything. Remove only duplicate headers. Keep all VERDICT lines intact.');
+      setProgress(97,'Done.');
+    }
+
+    setProgress(100,'Complete');
+    setTimeout(()=>{
+      document.getElementById('progress-panel').classList.remove('visible');
+      const body=document.getElementById('output-body');
+      body.innerHTML='';
+      body.appendChild(formatOutput(finalOutput));
+      document.getElementById('output-wrapper').classList.add('visible');
+      document.getElementById('output-wrapper').scrollIntoView({behavior:'smooth',block:'start'});
+      document.getElementById('analyse-btn').disabled=false;
+    },400);
+
+  } catch(err){
+    console.error(err);
+    document.getElementById('progress-panel').classList.remove('visible');
+    document.getElementById('error-msg').textContent=err.message||'Something went wrong. Check your API key and try again.';
+    document.getElementById('error-banner').classList.add('visible');
+    document.getElementById('analyse-btn').disabled=false;
+  }
+}
+
+// ── Selection / highlight features ────────────────────────────────────────
+let selToolbarVisible = false;
+
+function onSelectionChange() {
+  const sel = window.getSelection();
+  if(!sel || sel.isCollapsed) {
+    hideSelToolbar();
+  }
+}
+
+function onMouseUp(e) {
+  // Small delay to let selection settle
+  setTimeout(()=>{
+    const sel = window.getSelection();
+    if(!sel || sel.isCollapsed) { hideSelToolbar(); return; }
+    const text = sel.toString().trim();
+    if(text.length < 2) { hideSelToolbar(); return; }
+
+    // Only trigger inside output body
+    const outputBody = document.getElementById('output-body');
+    if(!outputBody.contains(sel.anchorNode)) { hideSelToolbar(); return; }
+
+    lastSelection = text;
+    showSelToolbar(e.clientX, e.clientY);
+  }, 50);
+}
+
+function showSelToolbar(x, y) {
+  const tb = document.getElementById('sel-toolbar');
+  tb.style.left = Math.min(x, window.innerWidth-180)+'px';
+  tb.style.top = (y-44)+'px';
+  tb.classList.add('visible');
+  selToolbarVisible = true;
+}
+
+function hideSelToolbar() {
+  document.getElementById('sel-toolbar').classList.remove('visible');
+  selToolbarVisible = false;
+}
+
+// ── Explain (definitions + simplified explanation) ─────────────────────────
+async function triggerExplain(selectedText) {
+  const sel = window.getSelection();
+  let x=200, y=200;
+  if(sel && sel.rangeCount>0) {
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    x = rect.left + rect.width/2;
+    y = rect.bottom + window.scrollY;
+  }
+
+  showFloat(x, y - window.scrollY + 10);
+
+  const fb = document.getElementById('float-box');
+  const title = document.getElementById('float-box-title');
+  const content = document.getElementById('float-box-content');
+  const loading = document.getElementById('float-loading');
+  const answer = document.getElementById('float-box-answer');
+  const input = document.getElementById('float-box-input');
+
+  answer.style.display='none';
+  input.value='';
+  content.textContent='';
+  loading.style.display='block';
+
+  const isSingleWord = selectedText.split(/\s+/).length <= 2;
+  title.textContent = isSingleWord ? 'Definition' : 'Plain English';
+
+  const prompt = isSingleWord
+    ? `Define the legal term "${selectedText}" in 1-2 plain English sentences. Be concise.`
+    : `Explain this passage from a legal judgment in plain English in 2-3 sentences. Do not summarise — explain what it means:\n\n"${selectedText}"`;
+
+  try {
+    const result = await callClaude(prompt, 'You are a legal plain-English explainer. Give concise, accurate explanations. No preamble.', 300);
+    loading.style.display='none';
+    content.textContent=result.trim();
+    input.placeholder='Ask a follow-up question…';
+    fb._context = selectedText;
+  } catch(err) {
+    loading.style.display='none';
+    content.textContent='Could not fetch explanation. Check your API key.';
+  }
+}
+
+function showFloat(x, y) {
+  const fb = document.getElementById('float-box');
+  const w = 320;
+  const left = Math.min(Math.max(x - w/2, 8), window.innerWidth - w - 8);
+  const top = Math.min(y + 8, window.innerHeight - 200);
+  fb.style.left = left+'px';
+  fb.style.top = top+'px';
+  fb.classList.add('visible');
+}
+
+function hideFloat() {
+  document.getElementById('float-box').classList.remove('visible');
+  document.getElementById('float-box-answer').style.display='none';
+}
+
+// Draggable float box
+(function(){
+  const fb = document.getElementById('float-box');
+  const handle = document.getElementById('float-box-drag');
+  let dragging=false, ox=0, oy=0;
+  handle.addEventListener('mousedown', e=>{
+    if(e.target.id==='float-box-close') return;
+    dragging=true;
+    ox=e.clientX-fb.getBoundingClientRect().left;
+    oy=e.clientY-fb.getBoundingClientRect().top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    fb.style.left=Math.max(0,Math.min(window.innerWidth-fb.offsetWidth, e.clientX-ox))+'px';
+    fb.style.top=Math.max(0,Math.min(window.innerHeight-fb.offsetHeight, e.clientY-oy))+'px';
+  });
+  document.addEventListener('mouseup', ()=>{ dragging=false; });
+
+  // Close button
+  document.getElementById('float-box-close').addEventListener('click', hideFloat);
+
+  // Prevent scroll propagation so hovering box scrolls the box not the page
+  fb.addEventListener('wheel', e=>{ e.stopPropagation(); }, {passive:true});
+})();
+
+async function answerFollowUp(question) {
+  const answer = document.getElementById('float-box-answer');
+  const loading = document.getElementById('float-loading');
+  const context = document.getElementById('float-box')._context || '';
+  loading.style.display='block';
+  answer.style.display='none';
+  try {
+    const prompt=`Context from a legal judgment: "${context}"\n\nFollow-up question: ${question}\n\nAnswer concisely in 2-3 sentences.`;
+    const result=await callClaude(prompt,'You are a legal plain-English explainer. Answer follow-up questions about legal passages concisely.',400);
+    loading.style.display='none';
+    answer.textContent=result.trim();
+    answer.style.display='block';
+  } catch(err) {
+    loading.style.display='none';
+    answer.textContent='Could not fetch answer.';
+    answer.style.display='block';
+  }
+}
+
+// ── Find in source ─────────────────────────────────────────────────────────
+function findInSource(selectedText) {
+  if(!currentText) { alert('No source text loaded.'); return; }
+
+  const split = document.getElementById('output-split');
+  const sourcePanel = document.getElementById('source-panel');
+  const sourceBody = document.getElementById('source-body');
+
+  split.classList.add('show-source');
+  sourcePanel.style.display='flex';
+
+  // Find the selected text in the source
+  const idx = currentText.toLowerCase().indexOf(selectedText.toLowerCase().substring(0,80));
+
+  // Build highlighted source HTML
+  let html = '';
+  if(idx>=0) {
+    // Find a clean sentence boundary near the match for context
+    const start = Math.max(0, idx-20);
+    const end = Math.min(currentText.length, idx+selectedText.length+20);
+    const before = escapeHtml(currentText.substring(0,start));
+    const match = escapeHtml(currentText.substring(start,end));
+    const after = escapeHtml(currentText.substring(end));
+    html = before + '<span class="src-highlight">' + match + '</span>' + after;
+    sourceBody.innerHTML = html;
+    // Scroll to highlight
+    setTimeout(()=>{
+      const hl = sourceBody.querySelector('.src-highlight');
+      if(hl) hl.scrollIntoView({behavior:'smooth',block:'center'});
+    },100);
+  } else {
+    sourceBody.textContent = currentText;
+    // Fuzzy note
+    const note = document.createElement('div');
+    note.style.cssText='padding:8px 12px;background:#fff3cd;border-radius:4px;font-size:12px;color:#92580a;margin-bottom:12px;';
+    note.textContent='Exact match not found — showing full source text.';
+    sourceBody.insertBefore(note, sourceBody.firstChild);
+  }
+
+  document.getElementById('output-wrapper').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
