@@ -1,10 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/decode.js", "use": "@vercel/node" }
-  ],
-  "routes": [
-    { "src": "/api/decode", "dest": "/api/decode.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/decode", "destination": "/api/decode.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
